@@ -1,0 +1,13 @@
+body:
+  - type: input
+    attributes:
+      name: siyuan_api_url
+      label: SiYuan API URL
+      description: The URL of your SiYuan Note API (e.g., http://127.0.0.1:6806)
+      defaultValue: http://127.0.0.1:6806
+  - type: passwordBox
+    attributes:
+      name: siyuan_api_token
+      label: SiYuan API Token
+      description: Your SiYuan Note API Token (found in SiYuan Settings -> About)
+      defaultValue: ""

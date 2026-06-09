@@ -1,0 +1,12 @@
+{
+  "ID": "88f5418d-876e-4b38-8dfe-56c03d7fada7",
+  "ActionKeyword": "sy",
+  "Name": "SiYuan Search",
+  "Description": "Search SiYuan notes and open them in SiYuan.",
+  "Author": "minyoad",
+  "Version": "1.0.0",
+  "Language": "python",
+  "Website": "https://github.com/minyoad/Flow.Launcher.Plugin.SiYuanSearch",
+  "ExecuteFileName": "main.py",
+  "IcoPath": "Images\\siyuan.png"
+}
