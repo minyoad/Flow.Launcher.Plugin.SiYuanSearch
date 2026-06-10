@@ -1,6 +1,7 @@
 import requests
 from json import JSONDecodeError
 from pyflowlauncher import Plugin, Result, Method, api as API
+from pyflowlauncher.icons import WARNING,ERROR
 
 class Query(Method):
     def __init__(self, plugin):
@@ -17,7 +18,7 @@ class Query(Method):
             self.add_result(Result(
                 title="SiYuan API Token Missing",
                 subtitle="Please configure your SiYuan API Token in plugin settings.",
-                icon="Images/warning.png"
+                icon=WARNING
             ))
             return self.return_results()
 
@@ -25,7 +26,7 @@ class Query(Method):
             self.add_result(Result(
                 title="SiYuan API URL Missing",
                 subtitle="Please configure your SiYuan API URL in plugin settings.",
-                icon="Images/warning.png"
+                icon=WARNING
             ))
             return self.return_results()
 
@@ -50,7 +51,7 @@ class Query(Method):
                 self.add_result(Result(
                     title="SiYuan API Response Error",
                     subtitle=f"SiYuan API returned non-JSON response. Raw content: {response.text[:200]}",
-                    icon="Images/error.png"
+                    icon=ERROR
                 ))
                 return self.return_results()
 
@@ -84,19 +85,19 @@ class Query(Method):
             self.add_result(Result(
                 title="Connection Error",
                 subtitle=f"Could not connect to SiYuan at {siyuan_api_url}. Is SiYuan running and API enabled?",
-                icon="Images/error.png"
+                icon=ERROR
             ))
         except requests.exceptions.RequestException as e:
             self.add_result(Result(
                 title="SiYuan API Error",
                 subtitle=f"An error occurred while calling SiYuan API: {e}",
-                icon="Images/error.png"
+                icon=ERROR
             ))
         except Exception as e:
             self.add_result(Result(
                 title="Plugin Error",
                 subtitle=f"An unexpected error occurred: {e}",
-                icon="Images/error.png"
+                icon=ERROR
             ))
 
         return self.return_results()
