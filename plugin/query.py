@@ -9,8 +9,7 @@ class Query(Method):
         self.plugin = plugin
 
     def __call__(self, query: str):
-        results = []
-
+        
         siyuan_api_url = self.plugin.settings.get("siyuan_api_url")
         siyuan_api_token = self.plugin.settings.get("siyuan_api_token")
 
