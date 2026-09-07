@@ -1,7 +1,29 @@
 import requests
+import re
+from urllib.parse import urlparse
 from json import JSONDecodeError
 from pyflowlauncher import Plugin, Result, Method, api as API
-from pyflowlauncher.icons import WARNING,ERROR
+from pyflowlauncher.icons import WARNING, ERROR
+
+
+def is_local_url(url: str) -> bool:
+    """Check if the URL points to a local instance."""
+    try:
+        parsed = urlparse(url)
+        host = parsed.hostname or ""
+        host_lower = host.lower()
+        if host_lower in ("127.0.0.1", "localhost", "0.0.0.0", "::1"):
+            return True
+        if re.match(r"^192\.168\.", host):
+            return True
+        if re.match(r"^10\.", host):
+            return True
+        if re.match(r"^172\.(1[6-9]|2\d|3[0-1])\.", host):
+            return True
+        return False
+    except Exception:
+        return False
+
 
 class Query(Method):
     def __init__(self, plugin):
@@ -9,9 +31,9 @@ class Query(Method):
         self.plugin = plugin
 
     def __call__(self, query: str):
-        
-        siyuan_api_url = self.plugin.settings.get("siyuan_api_url")
-        siyuan_api_token = self.plugin.settings.get("siyuan_api_token")
+
+        siyuan_api_url = self.plugin.settings.get("siyuan_api_url", "").strip()
+        siyuan_api_token = self.plugin.settings.get("siyuan_api_token", "").strip()
 
         if not siyuan_api_token:
             self.add_result(Result(
@@ -29,27 +51,37 @@ class Query(Method):
             ))
             return self.return_results()
 
+        siyuan_api_url = siyuan_api_url.rstrip("/")
+
+        use_local_app = is_local_url(siyuan_api_url)
+
+        if not use_local_app and siyuan_api_url.startswith("http://"):
+            siyuan_api_url = "https://" + siyuan_api_url[7:]
+
         try:
             headers = {
                 "Authorization": f"Token {siyuan_api_token}",
                 "Content-Type": "application/json"
             }
+            escaped_query = query.replace("'", "''").replace("%", "\\%").replace("_", "\\_")
             payload = {
-                "stmt": f"SELECT id, content FROM blocks WHERE content LIKE '%{query}%' LIMIT 20"
+                "stmt": f"SELECT id, content FROM blocks WHERE content LIKE '%{escaped_query}%' LIMIT 20"
             }
             response = requests.post(
                 f"{siyuan_api_url}/api/query/sql",
                 headers=headers,
-                json=payload
+                json=payload,
+                timeout=15
             )
             response.raise_for_status()
 
             try:
                 search_results = response.json()
             except JSONDecodeError:
+                content_preview = response.text[:200] if response.text else "(empty response)"
                 self.add_result(Result(
                     title="SiYuan API Response Error",
-                    subtitle=f"SiYuan API returned non-JSON response. Raw content: {response.text[:200]}",
+                    subtitle=f"Non-JSON response. Check URL is correct (no trailing slash?). Raw: {content_preview}",
                     icon=ERROR
                 ))
                 return self.return_results()
@@ -63,15 +95,18 @@ class Query(Method):
                     if len(title) > 50:
                         title = title[:50] + "..."
 
-                    siyuan_url = f"siyuan://blocks/{block_id}"
+                    if use_local_app:
+                        open_url = f"siyuan://blocks/{block_id}"
+                    else:
+                        open_url = f"{siyuan_api_url}/stage/build/desktop/?id={block_id}"
 
                     result_item = Result(
                         title=title,
                         subtitle=f"Block ID: {block_id} - {content}",
                         icon="Images/siyuan.png",
-                        json_rpc_action=API.shell_run(f"start {siyuan_url}")
+                        json_rpc_action=API.shell_run(f"start {open_url}")
                     )
-  
+
                     self.add_result(result_item)
             else:
                 self.add_result(Result(
