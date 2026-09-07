@@ -4,7 +4,7 @@
   "Name": "SiYuan Search",
   "Description": "Search SiYuan notes and open them in SiYuan.",
   "Author": "minyoad",
-  "Version": "1.0.0",
+  "Version": "1.2.0",
   "Language": "python",
   "Website": "https://github.com/minyoad/Flow.Launcher.Plugin.SiYuanSearch",
   "ExecuteFileName": "main.py",
